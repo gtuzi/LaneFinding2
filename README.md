@@ -70,7 +70,7 @@ Determine the *curvature* of the lane and vehicle position with respect to cente
 Warp the detected lane boundaries back onto the original image.
 Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 <p align="center">
-  <img src="test_images/labeled_image.jpg" width="350"/>
+  <img src="output_images/labeled_image.jpg" width="350"/>
 </p>
 
 
