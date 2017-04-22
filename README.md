@@ -70,8 +70,6 @@ Output visual display of the lane boundaries and numerical estimation of lane cu
 </p>
 
 
----
-
-
+### Misc.
 The images for camera calibration are stored in the folder called `camera_cal`.  
 The video called `project_video.mp4` is the video used for the video pipeline. The labeled output of this video is `project_video_out.mp4`
