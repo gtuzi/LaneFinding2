@@ -1,6 +1,10 @@
 ## Advanced Lane Finding
 Software pipeline to identify the lane boundaries in a video.
 
+
+#### Detailed Write-up
+A detailed writeup is included as a python notebook 'WriteUp.ipynb' and an html version `WriteUp.html`. The html version should be able to run the embedded output video directly from the browser.
+
 ---
 
 
