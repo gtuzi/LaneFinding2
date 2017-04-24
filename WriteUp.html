@@ -18921,7 +18921,15 @@ I0IIIYSQiP8PxfbR0ISuGn0AAAAASUVORK5CYII=
 <div class="text_cell_render border-box-sizing rendered_html">
 <hr>
 <h3 id="Transform-Image---Bird's-Eye-View">Transform Image - Bird's Eye View<a class="anchor-link" href="#Transform-Image---Bird's-Eye-View">&#182;</a></h3><p>Using a the undistorting parameters obtained from chessboard calibration, and using trapezoidal ROI, use its corners to transform the image into a bird's eyeview</p>
-<h3 id="Note---Narrow-&amp;-Wide-ROIs">Note - Narrow &amp; Wide ROIs<a class="anchor-link" href="#Note---Narrow-&amp;-Wide-ROIs">&#182;</a></h3><p>The example below shows a <strong>narrowly</strong> aligned ROI as well as a <strong>wide</strong> ROI. I found that the narrow ROI doesn't work too well when the vehicle veers too much from the center. It causes the lines to appear non-parallel and "bent outwards". During run-time, the wider ROI is used. This causes the lines to be contained within the trapezius area, while the lines appear bent towards each-other.</p>
+<h3 id="Explanation---Narrow-vs.-Wide-ROIs">Explanation - Narrow vs. Wide ROIs<a class="anchor-link" href="#Explanation---Narrow-vs.-Wide-ROIs">&#182;</a></h3><p>The example below shows two types of ROI definitions:</p>
+<ul>
+<li><strong>narrowly</strong> aligned ROI, i.e. tighly fitting straight lines</li>
+<li><strong>wide</strong> ROI, a somewhat wider area in the farther corners</li>
+</ul>
+<p>Both ROIs have the same lower coordinates (closest to vehicle). Only the farther corners are different.</p>
+<p>I found that the narrow ROI doesn't work too well, at times, when the vehicle veers too much from the center. When the veering happens, the lines to appear non-parallel and "bent away" from each other. The further the vehicle veers from the center, the worse this gets and it causes failures during sanity cheks for the lines being parallel in some cases.</p>
+<p>On the other hand, wider ROI ends up containing the lines <em>within</em> its bounds. This method enThis way while the lines appear bent towards each-other.</p>
+<p>By visual inspection, the difference between the two cases is less than 10cm in variation.</p>
 <h5 id="Implementation">Implementation<a class="anchor-link" href="#Implementation">&#182;</a></h5><p>The unwarping method <code>warp_img</code>, in <code>CamCalTools</code>, does the following:</p>
 <p>--
 1 - applies the chessboard calibration parameters to undistord the BGR image (line <em>175</em>)</p>
@@ -35749,8 +35757,13 @@ AAAASUVORK5CYII=
 <h3 id="Curvature">Curvature<a class="anchor-link" href="#Curvature">&#182;</a></h3><p>Curvature is measured based on the center-fit of the lane.</p>
 <h4 id="Implementation">Implementation<a class="anchor-link" href="#Implementation">&#182;</a></h4><p>Located in <code>LineFindingTools.curvature()</code> (<em>lines: 201-206</em>)</p>
 <hr>
-<h3 id="Center-Lane-Offset">Center Lane Offset<a class="anchor-link" href="#Center-Lane-Offset">&#182;</a></h3><p>Center lane offset is computed from the center fitted line, computed at the bottom the image (max(y))</p>
-<p>Offset is positive when vehicle is to the right of center. Offset is negative when vehicle is to the left of center.</p>
+<h3 id="Center-Lane-Offset-Computation">Center Lane Offset Computation<a class="anchor-link" href="#Center-Lane-Offset-Computation">&#182;</a></h3><p>Center lane offset is computed from the center fitted line, computed at the bottom the image (max(y)). Computation of the vehicle center offest is computed as:</p>
+<p>Center of Image - CenterFit(@bottom of image). The values are scaled to world measures according to the following:</p>
+<p><code>ym_per_pix = 30 / 720</code>  -  meters per pixel in y dimension</p>
+<p><code>xm_per_pix = 3.7 / 700</code> - meters per pixel in x dimension</p>
+<p>as given in the sample code of the lecture.</p>
+<p><strong>Computation of center offset is performed in warped domain scaled for world measurements</strong>. This means that once we have transformed the lanes into bird's eye view, we then proceed to compute the offest from the center of the horizontal dimension.</p>
+<p><em>Note !!!</em> Offset is positive when vehicle is to the right of center. Offset is negative when vehicle is to the left of center.</p>
 <h4 id="Implementation">Implementation<a class="anchor-link" href="#Implementation">&#182;</a></h4><p>Located in <code>LineFindingTools.center_offset()</code> (<em>lines: 251-255</em>)</p>
 
 </div>
@@ -41666,19 +41679,29 @@ Buffer (fliter): 3</p>
 </div>
 
 </div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Videos">Videos<a class="anchor-link" href="#Videos">&#182;</a></h2><p>I am including two videos/tests performed, using both narrow and wide ROIs. As mentioned earlier, by visual inspection, their difference is not more than 10cm in this video.</p>
+<h4 id="Narrow-ROI">Narrow ROI<a class="anchor-link" href="#Narrow-ROI">&#182;</a></h4>
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">HTML</span>
 
-<span class="n">video</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;project_video_out.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;r+b&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;project_video_out_narrow.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;r+b&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 <span class="n">encoded</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">video</span><span class="p">)</span>
-<span class="n">HTML</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s1">&#39;&#39;&#39;&lt;video alt=&quot;project_video&quot; width=&quot;640&quot; height=&quot;360&quot; controls&gt;</span>
-<span class="s1">                &lt;source src=&quot;project_video_out.mp4&quot; type=&quot;video/mp4&quot; /&gt;</span>
+<span class="n">HTML</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s1">&#39;&#39;&#39;&lt;video alt=&quot;project_video_narrow&quot; width=&quot;640&quot; height=&quot;360&quot; controls&gt;</span>
+<span class="s1">                &lt;source src=&quot;project_video_out_narrow.mp4&quot; type=&quot;video/mp4&quot; /&gt;</span>
 <span class="s1">             &lt;/video&gt;&#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">encoded</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)))</span>
 </pre></div>
 
@@ -41691,12 +41714,57 @@ Buffer (fliter): 3</p>
 
 
 <div class="output_area">
-<div class="prompt output_prompt">Out[20]:</div>
+<div class="prompt output_prompt">Out[36]:</div>
 
 
 <div class="output_html rendered_html output_subarea output_execute_result">
-<video alt="project_video" width="640" height="360" controls>
-                <source src="project_video_out.mp4" type="video/mp4" />
+<video alt="project_video_narrow" width="640" height="360" controls>
+                <source src="project_video_out_narrow.mp4" type="video/mp4" />
+             </video>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Wide-ROI">Wide ROI<a class="anchor-link" href="#Wide-ROI">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">video</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;project_video_out_wide.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;r+b&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="n">encoded</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">video</span><span class="p">)</span>
+<span class="n">HTML</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s1">&#39;&#39;&#39;&lt;video alt=&quot;project_video_wide&quot; width=&quot;640&quot; height=&quot;360&quot; controls&gt;</span>
+<span class="s1">                &lt;source src=&quot;project_video_out_wide.mp4&quot; type=&quot;video/mp4&quot; /&gt;</span>
+<span class="s1">             &lt;/video&gt;&#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">encoded</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+<div class="prompt output_prompt">Out[35]:</div>
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<video alt="project_video_wide" width="640" height="360" controls>
+                <source src="project_video_out_wide.mp4" type="video/mp4" />
              </video>
 </div>
 
@@ -41723,7 +41791,7 @@ Negative Offset: Left of Center</p>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Conclusions">Conclusions<a class="anchor-link" href="#Conclusions">&#182;</a></h2><h3 id="Issues">Issues<a class="anchor-link" href="#Issues">&#182;</a></h3><p><strong>Calibration Points</strong> - using too many object points slows down undistortion process.</p>
-<p><strong>ROI</strong> plays a very important role. You cannot rely on the perfectly straight, centered vehicle ROI (trapezius) definition because as the vehicle shifts to the left or to the right, the transformed lanes - when viewed from a bird's eye view - loose their <em>relative</em> direction between the two.</p>
+<p><strong>ROI</strong> plays a very important role. You cannot rely on the perfectly straight, centered vehicle ROI (trapezius) definition because as the vehicle shifts to the left or to the right, the transformed lanes - when viewed from a bird's eye view - loose their <em>relative</em> direction between the two. <em>Narrow</em> ROI as defined above, tends to be more sensitive to vehicle dynamic changes during the drive.</p>
 <p><strong>Lane Shape Validation 1</strong> - stemming from the ROI determination - it is unreliable (to determine if lanes are parallel to each other, radius of curvature ends up being not consistent between the two, some of the radius of curvature values become meaningless as a result.</p>
 <p><strong>Lane Shape Validation 2</strong> - implemented <em>single lane validation</em> in the <code>Line</code> class. The <code>Line</code> class buffers the lines. If a new line fit is substantially different from the buffered fit (averaged over the previous buffered results) it is counted as a failure to add. If 3 failures are counted, a reset of line is performed.</p>
 <p><strong>Lane Fading / Disappearing</strong> - the pipeline must be robust to one (or both) of the lines disappearing from view. This would require a more robust pipeline logic construct than what has been implemented here.</p>
